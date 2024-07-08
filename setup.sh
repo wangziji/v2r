@@ -1,7 +1,7 @@
 #!/bin/bash
 # for debian system
 
-export DOMIAN=jp01.outgreatwall.cc
+export DOMIAN="***"
 echo "DOMIAN: $DOMIAN"
 
 # 安装uuidgen
