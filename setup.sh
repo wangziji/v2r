@@ -57,6 +57,7 @@ echo "UUID: $UUID"
 # fi
 
 # 拷贝nginx配置文件
+mkdir -p /etc/nginx
 cp ./etc/nginx/nginx.conf /etc/nginx/nginx.conf
 # 测试nginx配置文件
 nginx -t
@@ -67,6 +68,7 @@ systemctl restart nginx
 # 安装v2ray
 bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 # 拷贝v2ray配置文件
+mkdir -p /usr/local/etc/v2ray
 cp ./etc/v2ray/config.json /usr/local/etc/v2ray/config.json
 # 将/etc/v2ray/config.json文件中的${UUID}替换为生成的uuid
 sed -i "s/\${UUID}/$UUID/g" /usr/local/etc/v2ray/config.json
