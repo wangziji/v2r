@@ -1,22 +1,50 @@
 {
-    "inbounds": [
-      {
-        "port": 8888,
-        "protocol": "vmess",
-        "settings": {
-          "clients": [
-            {
-              "id": "${UUID}", 
-              "alterId": 16
-            }
-          ]
-        }
+    "log": {
+      "loglevel": "warning",
+      "access": "/dev/null",
+      "error": "/dev/null"
+    },
+    "inbounds": [{
+      "listen":"127.0.0.1",
+      "port": 10000,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "${UUID}",
+            "level": 1,
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+          "path": "/proxy"
+          }
       }
-    ],
+    }],
     "outbounds": [
       {
         "protocol": "freedom",
-        "settings": {}
+        "settings": {},
+        "tag": "allowed"
+      },
+      {
+        "protocol": "blackhole",
+        "settings": {},
+        "tag": "blocked"
       }
-    ]
+    ],
+    "routing": {
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "blocked"
+        }
+      ]
+    }
   }

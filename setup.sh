@@ -1,89 +1,76 @@
 #!/bin/bash
-# 如果没有安装docker安装docker
-if ! command -v docker &> /dev/null
-then
-    echo "docker not found, installing docker..."
-    sudo yum update
-    sudo yum install -y docker
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    echo "docker installed successfully"
-else
-    echo "docker already installed"
-fi
+# for debian system
 
-# 如果没有安装uuidgen安装uuidgen
-if ! command -v uuidgen &> /dev/null
-then
-    echo "uuidgen not found, installing uuidgen..."
-    sudo yum update
-    sudo yum install -y util-linux
-    echo "uuidgen installed successfully"
-else
-    echo "uuidgen already installed"
-fi
+export DOMIAN=jp01.outgreatwall.cc
+echo "DOMIAN: $DOMIAN"
 
-# 如果没有安装ufw安装ufw
-if ! command -v ufw &> /dev/null
-then
-    echo "ufw not found, installing ufw..."
-    sudo yum update
-    sudo yum install -y ufw
-    echo "ufw installed successfully"
-else
-    echo "ufw already installed"
-fi
+# 安装uuidgen
+apt-get update
+apt-get install uuid-runtime -y
+# 安装curl
+apt-get install curl -y
+# 安装socat
+apt-get install socat -y
+# 安装 netcat
+apt-get install netcat -y
 
-# 如果没有安装curl安装curl
-if ! command -v curl &> /dev/null
-then
-    echo "curl not found, installing curl..."
-    sudo yum update
-    sudo yum install -y curl
-    echo "curl installed successfully"
-else
-    echo "curl already installed"
-fi
+apt-get -y install nginx
+# 安装acme.sh
+# curl https://get.acme.sh | sh
+# source ~/.bashrc
 
-# 如果没有安装shuf安装shuf
-if ! command -v shuf &> /dev/null
-then
-    echo "shuf not found, installing shuf..."
-    sudo yum update
-    sudo yum install -y coreutils
-    echo "shuf installed successfully"
-else
-    echo "shuf already installed"
-fi
-
-
-
-# 拉取v2ray镜像
-docker pull v2fly/v2fly-core
 
 # 生成uuid
-uuid=$(uuidgen)
+export UUID=$(uuidgen)
+echo "UUID: $UUID"
 
-# 生成一个10000-60000之间的随机端口，确认端口未被占用，如果被占用则重新生成
-port=0
-while [ $port -lt 10000 ] || [ $port -gt 60000 ]
-do
-    port=$(shuf -i 10000-60000 -n 1)
-    netstat -an | grep $port
-    if [ $? -eq 0 ]
-    then
-        port=0
-    fi
-done
+# export password="mIgWq3oF6ewrSr"
 
-# 防火墙开放端口
-sudo ufw allow $port
+# # 检测是否存在 /etc/v2ray/v2ray.crt 和 /etc/v2ray/v2ray.key
+# new_cert=0
+# if [ ! -f "/etc/v2ray/v2ray.crt" ] || [ ! -f "/etc/v2ray/v2ray.key" ]; then
+#     new_cert=1
+# fi
 
+# # 如果new_cert=0, 检查证书有效期是否小于30天
+# if [ $new_cert -eq 0 ]; then
+#     cert_date=$(date -d "$(openssl x509 -in /etc/v2ray/v2ray.crt -noout -dates | grep notAfter | cut -d= -f2)" +%s)
+#     now_date=$(date +%s)
+#     if [ $((cert_date - now_date)) -lt 2592000 ]; then
+#         new_cert=2
+#     fi
+# fi
+
+# echo "new_cert: $new_cert"
+
+# # 如果new_cert=1, 生成新证书，new_cert=2, 更新证书
+# if [ $new_cert -eq 1 ]; then
+#     # 生成证书
+#     ~/.acme.sh/acme.sh --issue -d $DOMIAN --standalone -k ec-256
+#     # 安装证书
+#     ~/.acme.sh/acme.sh --installcert -d $DOMIAN --fullchainpath /etc/v2ray/v2ray.crt --keypath /etc/v2ray/v2ray.key --ecc
+# elif [ $new_cert -eq 2 ]; then
+#     # 更新证书
+#     ~/.acme.sh/acme.sh --renew -d $DOMIAN --force --ecc
+#     # 安装证书
+#     ~/.acme.sh/acme.sh --installcert -d $DOMIAN --fullchainpath /etc/v2ray/v2ray.crt --keypath /etc/v2ray/v2ray.key --ecc
+# fi
+
+# 拷贝nginx配置文件
+cp ./etc/nginx/nginx.conf /etc/nginx/nginx.conf
+# 测试nginx配置文件
+nginx -t
+# 重启nginx
+systemctl restart nginx
+
+
+# 安装v2ray
+bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
+# 拷贝v2ray配置文件
+cp ./etc/v2ray/config.json /usr/local/etc/v2ray/config.json
 # 将/etc/v2ray/config.json文件中的${UUID}替换为生成的uuid
-sed -i "s/\${UUID}/$uuid/g" /etc/v2ray/config.json
-
-# 获取本机ip
-ip=$(curl -s ifconfig.me)
-
-# 获取ip所在地
-location=$(curl -s https://ipapi.co/$ip/json/ | jq .country_name)
+sed -i "s/\${UUID}/$UUID/g" /usr/local/etc/v2ray/config.json
+# 测试配置文件
+/usr/local/bin/v2ray test -config /usr/local/etc/v2ray/config.json
+# 重启v2ray
+systemctl restart v2ray
