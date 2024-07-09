@@ -7,14 +7,13 @@
     "inbounds": [{
       "listen":"127.0.0.1",
       "port": 10000,
-      "protocol": "vless",
+      "protocol": "vmess",
       "settings": {
         "clients": [
           {
             "id": "${UUID}",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision",
-            "level": 0
+            "level": 1,
+            "alterId": 0
           }
         ]
       },

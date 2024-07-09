@@ -77,5 +77,12 @@ systemctl restart nginx
 # # 重启v2ray
 # systemctl restart v2ray
 
-# 安装xui
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+# 安装xray
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+# 拷贝xray配置文件
+mkdir -p /usr/local/etc/xray
+cp ./etc/xray/config.json /usr/local/etc/xray/config.json
+# 将/etc/xray/config.json文件中的${UUID}替换为生成的uuid
+sed -i "s/\${UUID}/$UUID/g" /usr/local/etc/xray/config.json
+# 重启xray
+systemctl restart xray.service
