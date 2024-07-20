@@ -14,6 +14,9 @@ apt-get install socat -y
 # 安装 netcat
 apt-get install netcat -y
 
+# procps
+apt-get install procps -y
+
 apt-get -y install nginx
 # 安装acme.sh
 # curl https://get.acme.sh | sh
@@ -55,6 +58,9 @@ echo "UUID: $UUID"
 #     # 安装证书
 #     ~/.acme.sh/acme.sh --installcert -d $DOMIAN --fullchainpath /etc/v2ray/v2ray.crt --keypath /etc/v2ray/v2ray.key --ecc
 # fi
+
+# 启动bbr
+wget https://raw.githubusercontent.com/bannedbook/fanqiang/master/v2ss/server-cfg/sysctl.conf  -O -> /etc/sysctl.conf
 
 # 拷贝nginx配置文件
 mkdir -p /etc/nginx
